@@ -1,0 +1,49 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:15
+    container_name: sf_fire_postgres
+    environment:
+      POSTGRES_DB: sf_fire_warehouse
+      POSTGRES_USER: dbt_user
+      POSTGRES_PASSWORD: dbt_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  airflow:
+    build: ./docker/airflow
+    container_name: sf_fire_airflow
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+      AIRFLOW__CORE__FERNET_KEY: 'put_your_key_here'  # Generate with python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./scripts:/opt/airflow/scripts
+      - ./dbt_project:/opt/airflow/dbt_project
+      - ./reports:/opt/airflow/reports
+    depends_on:
+      - postgres
+    command: >
+      bash -c "
+        set -e;
+        echo '[ENTRYPOINT] Running airflow db init...';
+        airflow db init;
+        echo '[ENTRYPOINT] Airflow db init complete.';
+        echo '[ENTRYPOINT] Running airflow users create...';
+        airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email admin@example.com || echo '[ENTRYPOINT] User admin already exists or an error occurred, continuing...';
+        echo '[ENTRYPOINT] Airflow users create step finished.';
+        echo '[ENTRYPOINT] Starting Airflow webserver in background and scheduler in foreground...';
+        airflow webserver --port 8080 &
+        exec airflow scheduler
+      "
+
+volumes:
+  postgres_data:

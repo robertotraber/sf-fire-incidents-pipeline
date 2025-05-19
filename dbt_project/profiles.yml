@@ -1,0 +1,14 @@
+# profiles.yml for DBT (place in ~/.dbt/ or set DBT_PROFILES_DIR)
+default:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: postgres
+      user: dbt_user
+      password: dbt_password
+      port: 5432
+      dbname: sf_fire_warehouse
+      schema: analytics
+      threads: 4
+      keepalives_idle: 0

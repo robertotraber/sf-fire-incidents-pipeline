@@ -1,0 +1,17 @@
+version: 2
+
+sources:
+  - name: raw
+    description: Raw data from SF Open Data portal
+    tables:
+      - name: raw_fire_incidents
+        description: Raw fire incidents data from San Francisco
+        columns:
+          - name: incident_number
+            description: Unique identifier for each incident
+            tests:
+              - not_null
+          - name: incident_date
+            description: Date and time of the incident
+            tests:
+              - not_null
