@@ -1,8 +1,25 @@
 # San Francisco Fire Incidents Data Pipeline
 
-## Overview
+## Project Description
 
-This project implements a complete ELT (Extract, Load, Transform) pipeline for analyzing San Francisco fire incidents data. The solution provides a scalable architecture for ingesting, transforming, and analyzing fire incident data to support business intelligence queries around time periods, districts, and battalions.
+This project implements a containerized ELT (Extract, Load, Transform) data pipeline for San Francisco Fire Incidents. It automates the process of:
+
+1.  **Extracting** recent fire incident data daily from the public SF OpenData API.
+2.  **Loading** this raw data into a PostgreSQL data warehouse.
+3.  **Transforming** the data using dbt (Data Build Tool) into cleaned, structured, and analytics-ready models. These models support common business intelligence queries, focusing on aggregations by time periods, geographic districts, and fire battalions.
+
+The entire pipeline is orchestrated by Apache Airflow, running within Docker containers managed by Docker Compose. This ensures a reproducible and isolated environment for development and execution. The solution also includes initial data quality tests via dbt and a basic Python script to generate example reports from the transformed data. The `README.md` provides comprehensive setup and operational instructions.
+
+## Key Assumptions for this Project
+
+1.  **Data Source Reliability**: The SF OpenData API is assumed to be consistently available and its schema for fire incidents data to be relatively stable.
+2.  **Daily Data Granularity**: The pipeline is designed for daily batch processing, assuming that daily updates are sufficient for the analytical needs.
+3.  **Local Development Focus**: The current setup (PostgreSQL as a data warehouse, default credentials) is optimized for a local Dockerized development environment. For production, components like the data warehouse and credential management would need to be scaled and secured appropriately.
+4.  **Defined Analytical Scope**: The primary analytical focus is on incidents aggregated by time, district, and battalion, as reflected in the dbt models.
+5.  **Sufficient Local Resources**: The user's machine running Docker is assumed to have adequate resources (RAM, CPU) to run the PostgreSQL and Airflow containers.
+6.  **Full Refresh of Recent Data**: The extraction process performs a full refresh of the last 30 days of data (for the initial load example), which is assumed manageable for this data source.
+7.  **User Responsibility for Security Keys**: It's assumed the user will generate and use their own unique Airflow Fernet key for security, as detailed in the setup instructions.
+8.  **Basic Reporting Needs**: The included report generation script serves as a basic example and is not intended as a full-fledged BI reporting solution.
 
 ## Architecture
 
